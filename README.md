@@ -36,6 +36,8 @@ to the ```require``` section of your `composer.json` file.
 'components' => [
     'sms' => [
         'class' => \alexeevdv\sms\ge\unicard\Provider::class,
+        // If you want to ensure only Georgia phone numbers would be sent
+        //'destinationChecker' => \alexeevdv\sms\ge\unicard\GeorgiaDestinationChecker::class,
     ],
 ],
 ```
