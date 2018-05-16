@@ -16,7 +16,7 @@ class Message extends BaseMessage
     private $_from;
 
     /**
-     * @var string
+     * @var string|array
      */
     private $_to;
 

@@ -134,6 +134,58 @@ class ProviderTest extends \Codeception\Test\Unit
     }
 
     /**
+     * @test
+     */
+    public function testSendMultiple()
+    {
+        $provider = new Provider([
+            'httpClient' => Stub::make(HttpClient::class, [
+                'post' => function () {
+                    return Stub::make(HttpRequest::class, [
+                        'send' => function () {
+                            return Stub::make(HttpResponse::class, [
+                                'getData' => [
+                                    'Statuses' => [
+                                        [
+                                            'ID' => 1,
+                                            'Number' => '222',
+                                            'ResultMessage' => 'Operation is Successful',
+                                            'Status' => '200',
+                                        ],
+                                        [
+                                            'ID' => 2,
+                                            'Number' => '555',
+                                            'ResultMessage' => 'Operation is Failed',
+                                            'Status' => '104',
+                                        ],
+                                        [
+                                            'ID' => 3,
+                                            'Number' => '666',
+                                            'ResultMessage' => 'Operation is Successful',
+                                            'Status' => '200',
+                                        ],
+                                    ],
+                                ],
+                            ]);
+                        },
+                    ]);
+                },
+            ])
+        ]);
+
+        $messages = [
+            Stub::make(Message::class, [
+                'getFrom' => '444',
+                'getTo' => ['555', '666'],
+                'getBody' => '777'
+            ]),
+            $this->getMessage(),
+        ];
+
+        $this->assertEquals(2, $provider->sendMultiple($messages));
+    }
+
+    /**
      * @return Message
      */
     private function getMessage()

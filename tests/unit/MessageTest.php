@@ -23,11 +23,21 @@ class MessageTest extends \Codeception\Test\Unit
     /**
      * @test
      */
-    public function testTo()
+    public function testToSingle()
     {
         $message = new Message;
         $message->setTo('123456');
         $this->assertEquals('123456', $message->getTo());
+    }
+
+    /**
+     * @test
+     */
+    public function testToMultiple()
+    {
+        $message = new Message;
+        $message->setTo(['1111', '2222']);
+        $this->assertEquals(['1111', '2222'], $message->getTo());
     }
 
     /**
