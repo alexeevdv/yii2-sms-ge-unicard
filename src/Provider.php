@@ -31,6 +31,11 @@ class Provider extends BaseProvider
     /**
      * @inheritdoc
      */
+    public $useFileTransport = false;
+
+    /**
+     * @inheritdoc
+     */
     protected function sendMessage($message)
     {
         /** @var HttpClient $httpClient */
