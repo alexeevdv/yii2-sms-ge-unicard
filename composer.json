@@ -1,0 +1,26 @@
+{
+    "name": "alexeevdv/yii2-sms-ge-unicard",
+    "type": "yii2-extension",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dmitry Alekseev",
+            "email": "mail@alexeevdv.ru"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "alexeevdv\\sms\\ge\\unicard\\": "src"
+        }
+    },
+    "require": {
+        "mikk150/yii2-sms": "^1.0",
+        "yiisoft/yii2-httpclient": "^2.0"
+    }
+}
