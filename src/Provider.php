@@ -52,7 +52,7 @@ class Provider extends BaseProvider
         try {
             $httpResponse = $httpClient->post('Send', $requestData)->send();
         } catch (HttpClientException $e) {
-            Yii::$app->errorHandler->logException($e);
+            Instance::ensure('errorHandler')->logException($e);
             return false;
         }
         $responseData = $httpResponse->getData();
