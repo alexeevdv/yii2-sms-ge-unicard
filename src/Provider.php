@@ -31,6 +31,11 @@ class Provider extends BaseProvider
     public $messageClass = Message::class;
 
     /**
+     * @var IDestinationChecker
+     */
+    public $destinationChecker;
+
+    /**
      * @var int
      */
     private $_messageCounter = 1;
@@ -42,7 +47,7 @@ class Provider extends BaseProvider
     protected function sendMessage($message)
     {
         $requestData = $this->buildRequestDataForMessage($message);
-        $responseData= $this->callApiSendMethod($requestData);
+        $responseData = $this->callApiSendMethod($requestData);
         return !!$this->messagesSent($responseData);
     }
 
@@ -67,11 +72,15 @@ class Provider extends BaseProvider
      */
     private function callApiSendMethod(array $requestData)
     {
+        if (!$requestData) {
+            return [];
+        }
+
         /** @var HttpClient $httpClient */
         $httpClient = Instance::ensure($this->httpClient, HttpClient::class);
 
         try {
-            $httpResponse = $httpClient->post('Send', $requestData)->send();
+            $httpResponse = $httpClient->post('Send', ['SMS' => $requestData])->send();
         } catch (HttpClientException $e) {
             Instance::ensure('errorHandler')->logException($e);
             return [];
@@ -99,19 +108,38 @@ class Provider extends BaseProvider
     /**
      * @param MessageInterface $message
      * @return array
+     * @throws InvalidConfigException
      */
     private function buildRequestDataForMessage(MessageInterface $message)
     {
-        $requestData = ['SMS' => []];
+        $requestData = [];
         foreach ((array) $message->getTo() as $to) {
-            $requestData['SMS'][] = [
+            $to = $this->ensureE164Format($to);
+            if ($this->destinationChecker) {
+                $checker = Instance::ensure($this->destinationChecker, IDestinationChecker::class);
+                if (!$checker->check($to)) {
+                    continue;
+                }
+            }
+
+            $requestData[] = [
                 'ID' => $this->_messageCounter++,
-                'Number' => $to,
+                'Number' => ltrim($to, '+'),
                 'Message' => $message->getBody(),
                 'Sender' => $message->getFrom(),
             ];
         }
 
         return $requestData;
+    }
+
+    /**
+     * @param string $number
+     * @return string
+     */
+    private function ensureE164Format($number)
+    {
+        // numbers only prefixed with plus
+        return '+' . preg_replace('/[^0-9]/', '', $number);
     }
 }

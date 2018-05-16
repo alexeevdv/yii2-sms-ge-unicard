@@ -2,14 +2,15 @@
 
 namespace tests\unit;
 
+use alexeevdv\sms\ge\unicard\GeorgiaDestinationChecker;
 use alexeevdv\sms\ge\unicard\Message;
 use alexeevdv\sms\ge\unicard\Provider;
 use Codeception\Stub;
 use Yii;
 use yii\httpclient\Client as HttpClient;
+use yii\httpclient\Exception as HttpClientException;
 use yii\httpclient\Request as HttpRequest;
 use yii\httpclient\Response as HttpResponse;
-use yii\httpclient\Exception as HttpClientException;
 use yii\web\ErrorHandler;
 
 /**
@@ -183,6 +184,67 @@ class ProviderTest extends \Codeception\Test\Unit
         ];
 
         $this->assertEquals(2, $provider->sendMultiple($messages));
+    }
+
+    /**
+     * @test
+     */
+    public function testSuccessfulSendWithDestinationChecker()
+    {
+        $provider = new Provider([
+            'destinationChecker' => GeorgiaDestinationChecker::class,
+            'httpClient' => Stub::make(HttpClient::class, [
+                'post' => function () {
+                    return Stub::make(HttpRequest::class, [
+                        'send' => function () {
+                            return Stub::make(HttpResponse::class, [
+                                'getData' => [
+                                    'Statuses' => [
+                                        [
+                                            'ID' => 1,
+                                            'Number' => '1234567890',
+                                            'ResultMessage' => 'Operation is Successful',
+                                            'Status' => '200',
+                                        ]
+                                    ],
+                                ],
+                            ]);
+                        },
+                    ]);
+                },
+            ])
+        ]);
+
+        $message = Stub::make(Message::class, [
+            'getFrom' => '111',
+            'getTo' => '+995595123123',
+            'getBody' => '333',
+        ]);
+        $this->assertTrue($provider->send($message));
+    }
+
+    /**
+     * @test
+     */
+    public function testNotSuccessfulSendWithDestinationChecker()
+    {
+        $provider = new Provider([
+            'destinationChecker' => GeorgiaDestinationChecker::class,
+            'httpClient' => Stub::make(HttpClient::class, [
+                'post' => function () {
+                    return Stub::make(HttpRequest::class, [
+                        'send' => Stub\Expected::never(),
+                    ]);
+                },
+            ])
+        ]);
+
+        $message = Stub::make(Message::class, [
+            'getFrom' => '111',
+            'getTo' => 'asdf',
+            'getBody' => '333',
+        ]);
+        $this->assertFalse($provider->send($message));
     }
 
     /**

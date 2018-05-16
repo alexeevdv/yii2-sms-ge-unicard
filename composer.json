@@ -22,7 +22,8 @@
     "require": {
         "mikk150/yii2-sms": "^1.0",
         "yiisoft/yii2-httpclient": "^2.0",
-        "giggsey/libphonenumber-for-php": "^8.9"
+        "giggsey/libphonenumber-for-php": "^8.9",
+        "mikk150/yii2-phone-validator": "^1.0"
     },
     "require-dev": {
         "yiisoft/yii2-coding-standards": "^2.0",
